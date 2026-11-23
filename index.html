@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ลอยกระทงออนไลน์ - โรงเรียนเทศบาล ๒ (ท.๒)</title>
+  <!-- เชื่อมต่อไฟล์ CSS -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <canvas id="scene"></canvas>
+
+  <div class="header-banner">
+    <h1>🌕 สืบสานประเพณีลอยกระทง ท.๒ 🌕</h1>
+    <p>โรงเรียนเทศบาล ๒ • วาดกระทงในแบบของคุณ หรือเลือกแบบสำเร็จรูปแล้วลอยเลย!</p>
+  </div>
+
+  <div class="controls">
+    <div class="mode-tabs" id="typeSelector">
+      <button type="button" class="type-btn active" data-type="custom">🎨 วาดกระทงเอง</button>
+      <button type="button" class="type-btn" data-type="banana">🌿 ใบตอง</button>
+      <button type="button" class="type-btn" data-type="lotus">🪷 ดอกบัว</button>
+      <button type="button" class="type-btn" data-type="bread">🍞 ขนมปัง</button>
+    </div>
+
+    <div class="draw-box show" id="drawBox">
+      <canvas id="drawPad" width="180" height="100"></canvas>
+      <div class="draw-tools">
+        <span>สี:</span>
+        <div class="color-dot" style="background:#4caf50" onclick="setPenColor('#4caf50')"></div>
+        <div class="color-dot" style="background:#ffca28" onclick="setPenColor('#ffca28')"></div>
+        <div class="color-dot" style="background:#f06292" onclick="setPenColor('#f06292')"></div>
+        <div class="color-dot" style="background:#29b6f6" onclick="setPenColor('#29b6f6')"></div>
+        <div class="color-dot" style="background:#ffffff" onclick="setPenColor('#ffffff')"></div>
+        <div class="color-dot" style="background:#ff7043" onclick="setPenColor('#ff7043')"></div>
+        <button type="button" class="clear-btn" onclick="clearPad()">ล้างภาพ</button>
+      </div>
+    </div>
+
+    <div class="input-row">
+      <input id="senderInput" type="text" placeholder="ชื่อ / ชั้น (เช่น ม.2/1)" maxlength="25" />
+      <input id="wishInput" type="text" placeholder="พิมพ์คำอธิษฐาน..." maxlength="40" />
+      <button id="launchBtn" onclick="handleUserSpawn()">ลอยกระทง (เหลือ 3 ครั้ง)</button>
+    </div>
+    <div class="quota-text" id="quotaText">สิทธิ์การลอยกระทงของคุณ: เหลือ 3 จาก 3 ครั้ง</div>
+  </div>
+
+  <!-- เชื่อมต่อไฟล์ JavaScript (วางไว้ก่อนปิด body เสมอ) -->
+  <script src="script.js"></script>
+</body>
+</html>
