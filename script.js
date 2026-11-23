@@ -1,4 +1,6 @@
-// --- ส่วนที่ 1: ระบบวาดภาพกระทงเอง ---
+// ==========================================
+// 1. เชื่อมต่อฐานข้อมูล Firebase (โปรเจกต์ loyt2-74b03)
+// ==========================================
 const firebaseConfig = {
   apiKey: "AIzaSyCIvH24wvisGyfOltwq6BCNhu7Bg3bKatY",
   authDomain: "://firebaseapp.com",
@@ -12,6 +14,10 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const krathongsRef = firebase.database().ref("t2_krathongs");
+
+// ==========================================
+// 2. ระบบวาดภาพกระทง
+// ==========================================
 const drawPad = document.getElementById("drawPad");
 const dCtx = drawPad.getContext("2d");
 let isDrawing = false;
@@ -22,79 +28,59 @@ dCtx.lineCap = "round";
 dCtx.lineJoin = "round";
 dCtx.lineWidth = 4;
 
-function setPenColor(color) {
-  penColor = color;
-}
-
+function setPenColor(c) { penColor = c; }
 function clearPad() {
   dCtx.clearRect(0, 0, drawPad.width, drawPad.height);
   hasDrawn = false;
 }
-
 function getPos(e) {
-  const rect = drawPad.getBoundingClientRect();
-  const clientX = e.touches ? e.touches.clientX : e.clientX;
-  const clientY = e.touches ? e.touches.clientY : e.clientY;
-  return {
-    x: clientX - rect.left,
-    y: clientY - rect.top
-  };
+  const r = drawPad.getBoundingClientRect();
+  const cx = e.touches ? e.touches[0].clientX : e.clientX;
+  const cy = e.touches ? e.touches[0].clientY : e.clientY;
+  return { x: cx - r.left, y: cy - r.top };
 }
-
 function startDraw(e) {
   isDrawing = true;
   hasDrawn = true;
-  const pos = getPos(e);
+  const p = getPos(e);
   dCtx.beginPath();
-  dCtx.moveTo(pos.x, pos.y);
+  dCtx.moveTo(p.x, p.y);
 }
-
 function moveDraw(e) {
   if (!isDrawing) return;
   e.preventDefault();
-  const pos = getPos(e);
+  const p = getPos(e);
   dCtx.strokeStyle = penColor;
-  dCtx.lineTo(pos.x, pos.y);
+  dCtx.lineTo(p.x, p.y);
   dCtx.stroke();
 }
-
-function stopDraw() {
-  isDrawing = false;
-}
+function stopDraw() { isDrawing = false; }
 
 drawPad.addEventListener("mousedown", startDraw);
 drawPad.addEventListener("mousemove", moveDraw);
 window.addEventListener("mouseup", stopDraw);
-
 drawPad.addEventListener("touchstart", startDraw, { passive: false });
 drawPad.addEventListener("touchmove", moveDraw, { passive: false });
 window.addEventListener("touchend", stopDraw);
 
-// --- ส่วนที่ 2: ระบบแม่น้ำและการลอยกระทง ---
+// ==========================================
+// 3. ระบบแม่น้ำและการลอยกระทงออนไลน์
+// ==========================================
 const canvas = document.getElementById("scene");
 const ctx = canvas.getContext("2d");
 let w, h;
-const krathongs = [];
 let selectedType = "custom";
-
+const krathongs = [];
 const MAX_WISHES = 3;
 let usedCount = parseInt(localStorage.getItem("t2_krathong_count") || "0", 10);
 
 function updateQuotaUI() {
-  const remaining = Math.max(0, MAX_WISHES - usedCount);
+  const rem = Math.max(0, MAX_WISHES - usedCount);
   const btn = document.getElementById("launchBtn");
   const text = document.getElementById("quotaText");
-
-  if (remaining > 0) {
-    btn.disabled = false;
-    btn.textContent = `ลอยกระทง (เหลือ ${remaining} ครั้ง)`;
-    text.textContent = `สิทธิ์การลอยกระทงของคุณ: เหลือ ${remaining} จาก ${MAX_WISHES} ครั้ง`;
-  } else {
-    btn.disabled = true;
-    btn.textContent = "ครบ 3 ครั้งแล้ว";
-    text.textContent = "ขอบคุณที่ร่วมลอยกระทงกับ ท.๒ (คุณใช้สิทธิ์ครบ 3 ครั้งแล้ว)";
-    text.style.color = "#ffcc80";
-  }
+  btn.disabled = rem <= 0;
+  btn.textContent = rem > 0 ? `ลอยกระทง (เหลือ ${rem} ครั้ง)` : "ครบ 3 ครั้งแล้ว";
+  text.textContent = rem > 0 ? `สิทธิ์การลอยกระทงของคุณ: เหลือ ${rem} จาก ${MAX_WISHES} ครั้ง` : "ขอบคุณที่ร่วมลอยกระทงกับ ท.๒ (ครบ 3 ครั้งแล้ว)";
 }
 
 document.querySelectorAll(".type-btn").forEach(btn => {
@@ -102,13 +88,7 @@ document.querySelectorAll(".type-btn").forEach(btn => {
     document.querySelectorAll(".type-btn").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
     selectedType = btn.dataset.type;
-
-    const drawBox = document.getElementById("drawBox");
-    if (selectedType === "custom") {
-      drawBox.classList.add("show");
-    } else {
-      drawBox.classList.remove("show");
-    }
+    document.getElementById("drawBox").classList.toggle("show", selectedType === "custom");
   });
 });
 
@@ -121,50 +101,50 @@ resize();
 
 function handleUserSpawn() {
   if (usedCount >= MAX_WISHES) return;
-
   if (selectedType === "custom" && !hasDrawn) {
-    alert("กรุณาวาดกระทงของคุณบนกระดานก่อนกดลอยนะครับ!");
+    alert("กรุณาวาดกระทงก่อนกดลอยนะครับ!");
     return;
   }
 
-  let customImage = null;
-  if (selectedType === "custom") {
-    customImage = new Image();
-    customImage.src = drawPad.toDataURL("image/png");
-  }
+  const sender = document.getElementById("senderInput").value.trim() || "ชาว ท.๒";
+  const wish = document.getElementById("wishInput").value.trim() || "ขอให้สมหวังทุกประการ";
+  const imageData = selectedType === "custom" ? drawPad.toDataURL("image/webp", 0.5) : null;
+
+  krathongsRef.push({
+    type: selectedType,
+    imageData: imageData,
+    sender: sender,
+    wish: wish,
+    yRatio: 0.52 + Math.random() * 0.25,
+    speed: 0.35 + Math.random() * 0.35
+  });
 
   usedCount++;
   localStorage.setItem("t2_krathong_count", usedCount.toString());
   updateQuotaUI();
-  spawnKrathong(selectedType, null, null, customImage);
-
-  if (selectedType === "custom") {
-    clearPad();
-  }
+  document.getElementById("wishInput").value = "";
+  if (selectedType === "custom") clearPad();
 }
 
-function spawnKrathong(type, defaultSender, defaultWish, customImg) {
-  const senderInput = document.getElementById("senderInput");
-  const wishInput = document.getElementById("wishInput");
-
-  const sender = defaultSender || senderInput.value.trim() || "ชาว ท.๒";
-  const wish = defaultWish || wishInput.value.trim() || "ขอให้เรียนเก่งๆ สมหวังทุกประการ";
-
+krathongsRef.limitToLast(40).on("child_added", (snap) => {
+  const data = snap.val();
+  if (!data) return;
+  let customImg = null;
+  if (data.type === "custom" && data.imageData) {
+    customImg = new Image();
+    customImg.src = data.imageData;
+  }
   krathongs.push({
-    x: Math.random() * (w - 220) + 110,
-    y: h * 0.52 + Math.random() * (h * 0.22),
-    speed: 0.35 + Math.random() * 0.4,
+    x: Math.random() * (w - 200) + 50,
+    yRatio: data.yRatio || 0.6,
+    speed: data.speed || 0.4,
     phase: Math.random() * Math.PI * 2,
-    type: type || "banana",
-    customImg,
-    sender,
-    wish
+    type: data.type || "banana",
+    customImg: customImg,
+    sender: data.sender || "ชาว ท.๒",
+    wish: data.wish || ""
   });
-
-  if (!defaultWish) {
-    wishInput.value = "";
-  }
-}
+});
 
 function drawBackground() {
   const sky = ctx.createLinearGradient(0, 0, 0, h * 0.48);
@@ -223,10 +203,8 @@ function drawPresetKrathong(x, y, type) {
 }
 
 function drawKrathong(k, t) {
-  const bob = Math.sin(t * 0.003 + k.phase) * 4;
   const x = k.x;
-  const y = k.y + bob;
-
+  const y = (h * k.yRatio) + Math.sin(t * 0.003 + k.phase) * 4;
   if (k.type === "custom" && k.customImg) {
     ctx.drawImage(k.customImg, x - 55, y - 35, 110, 62);
   } else {
@@ -238,12 +216,10 @@ function drawKrathong(k, t) {
     ctx.fillStyle = "#ff9800";
     ctx.fill();
   }
-
   ctx.textAlign = "center";
   ctx.fillStyle = "#ffe082";
   ctx.font = "bold 13px sans-serif";
   ctx.fillText(k.wish, x, y - 50);
-
   ctx.fillStyle = "#b3e5fc";
   ctx.font = "12px sans-serif";
   ctx.fillText(`(${k.sender})`, x, y - 35);
@@ -251,15 +227,14 @@ function drawKrathong(k, t) {
 
 function loop(t) {
   drawBackground();
-  for (let i = krathongs.length - 1; i >= 0; i--) {
+  for (let i = 0; i < krathongs.length; i++) {
     const k = krathongs[i];
     k.x += k.speed;
     drawKrathong(k, t);
-    if (k.x > w + 130) krathongs.splice(i, 1);
+    if (k.x > w + 130) k.x = -130;
   }
   requestAnimationFrame(loop);
 }
 
 updateQuotaUI();
-spawnKrathong("lotus", "ตัวแทนนักเรียน ท.๒", "สุขสันต์วันลอยกระทง ชาว ท.๒");
 requestAnimationFrame(loop);
