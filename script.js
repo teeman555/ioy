@@ -1,4 +1,17 @@
 // --- ส่วนที่ 1: ระบบวาดภาพกระทงเอง ---
+const firebaseConfig = {
+  apiKey: "AIzaSyCIvH24wvisGyfOltwq6BCNhu7Bg3bKatY",
+  authDomain: "://firebaseapp.com",
+  databaseURL: "https://firebasedatabase.app",
+  projectId: "loyt2-74b03",
+  storageBucket: "loyt2-74b03.firebasestorage.app",
+  messagingSenderId: "1056488680492",
+  appId: "1:1056488680492:web:9c10bbf90bba1aab17f589",
+  measurementId: "G-G7GEC8B7J6"
+};
+
+firebase.initializeApp(firebaseConfig);
+const krathongsRef = firebase.database().ref("t2_krathongs");
 const drawPad = document.getElementById("drawPad");
 const dCtx = drawPad.getContext("2d");
 let isDrawing = false;
